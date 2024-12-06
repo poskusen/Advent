@@ -1,3 +1,4 @@
+import copy
 board = {} # (True for obstacle, True for visited)
 pos_guard = [0,0]
 
@@ -5,7 +6,7 @@ guard_direction = 0 #[0,1] - up, [1,0] - right, [0,-1] - down, [-1,0] - left)
 visisted_amount = 0
 
 
-with open('input.txt', 'rb') as file:
+with open('test.txt', 'rb') as file:
     row = 0
     col = 0
     for line in file:
@@ -62,38 +63,38 @@ class walk_along():
             new_spot = self.add_list(spot, direction)
             if new_spot[0] in self.board and new_spot[1] in self.board[new_spot[0]]:
                 if direction in self.board[new_spot[0]][new_spot[1]][2]:
-                    return True, spot, not end_walk, 0
+                    return direction, spot, not end_walk, 0, True
                 elif self.board[new_spot[0]][new_spot[1]][0]:
                     end_walk = True
                     direction = self.new_direction(direction)
-                
                 else:
                     self.board[new_spot[0]][new_spot[1]][2].append(direction)
                     spot = new_spot
+                print(spot)
             else:
-                return False, spot, not end_walk, 0
+                return direction, spot, not end_walk, 0, False
         
-        return direction, spot, not end_walk, 1
+        return direction, spot, not end_walk, 1, True
 
     def solve(self):
         success = 1
         end_the_walk = False    
         while not end_the_walk and success == 1:
-            self.guard_direction, self.pos_guard, self.end_the_walk, success = self.walk_along_direction(self.guard_direction, self.pos_guard)
-        return self.guard_direction
+            self.guard_direction, self.pos_guard, self.end_the_walk, success, done = self.walk_along_direction(self.guard_direction, self.pos_guard)
+        return done
         
         
 amount = 0
-for i in range(0, len(board)):
-    for j in range(0, len(board[0])):
-        print(len(board))
+for i in range(0, len(board) - 1):
+    for j in range(0, len(board[0]) - 1):
+        print(f'placing: {(i,j)}')
         if not [i, j] == pos_guard and not board[i][j][0]:
-            new_board = board
+            new_board = copy.deepcopy(board)
             new_board[i][j][0] = True
             walk_object = walk_along(new_board, pos_guard, guard_direction)
             if walk_object.test_cyclical():
                 amount += 1
-    print(amount)
+                
 
 print(f'Cykliska: {amount}')
         
